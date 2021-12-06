@@ -20,6 +20,7 @@ Stage 2
       player: 3,
       stageBreakPoint: 4,
     };
+    this.stages = {};
   }
 
   mapSymbolToNumber(symbol) {
@@ -55,5 +56,23 @@ Stage 2
     });
 
     return processedData;
+  }
+
+  setStages() {
+    const dataArr = this.processMapData();
+    let i = 1;
+    let singleStage = [];
+
+    dataArr.forEach(data => {
+      if (data.includes(this.dataMappingSet.stageBreakPoint)) {
+        this.stages[`Stage${i}`] = singleStage;
+        singleStage = [];
+        i += 1;
+        return;
+      }
+      singleStage.push(data);
+    });
+
+    this.stages[`Stage${i}`] = singleStage;
   }
 }
