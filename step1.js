@@ -21,6 +21,7 @@ Stage 2
       stageBreakPoint: 4,
     };
     this.stages = {};
+    this.stagesInfo = {};
   }
 
   mapSymbolToNumber(symbol) {
@@ -74,5 +75,55 @@ Stage 2
     });
 
     this.stages[`Stage${i}`] = singleStage;
+  }
+
+  initStageInfo() {
+    return {
+      width: 0,
+      heigth: 0,
+      countHall: 0,
+      countBall: 0,
+      locationOfPlayer: 0,
+    };
+  }
+
+  setHeight(stageInfo, stage) {
+    stageInfo.heigth = stage.length;
+  }
+
+  setWidth(stageInfo, row) {
+    if (stageInfo.width < row.length) {
+      stageInfo.width = row.length;
+    }
+  }
+
+  setInfo(stageInfo, row, i) {
+    row.forEach((el, j) => {
+      if (el === this.dataMappingSet.hall) {
+        stageInfo.countHall += 1;
+      } else if (el === this.dataMappingSet.ball) {
+        stageInfo.countBall += 1;
+      } else if (el === this.dataMappingSet.player) {
+        stageInfo.locationOfPlayer = [i + 1, j + 1];
+      }
+    });
+  }
+
+  setSingleStageInfo(stage) {
+    const stageInfo = this.initStageInfo();
+    this.setHeight(stageInfo, stage);
+
+    stage.forEach((row, i) => {
+      this.setWidth(stageInfo, row);
+      this.setInfo(stageInfo, row, i);
+    });
+    
+    return stageInfo;
+  }
+
+  setStagesInfo() {
+    for (let stage in this.stages) {
+      this.stagesInfo[stage] = this.setSingleStageInfo(this.stages[stage]);
+    }
   }
 }
