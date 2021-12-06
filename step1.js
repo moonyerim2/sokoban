@@ -189,3 +189,19 @@ class GameViewer {
     this.renderInfo(info);
   }
 }
+
+class GameController {
+  constructor() {
+    this.gameMap = new MapMaker();
+    this.gameView = new GameViewer();
+    this.init();
+  }
+
+  init() {
+    this.gameMap.setMapData();
+
+    for (let stage in this.gameMap.stages) {
+      this.gameView.renderStage(stage, this.gameMap.stages[stage], this.gameMap.stagesInfo[stage]);
+    }
+  }
+}
