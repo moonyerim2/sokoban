@@ -205,3 +205,15 @@ class GameController {
     }
   }
 }
+
+class App {
+  constructor() {
+    this.init();
+  }
+
+  init() {
+    new GameController();
+  }
+}
+
+new App();
