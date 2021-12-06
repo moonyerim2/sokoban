@@ -132,3 +132,44 @@ Stage 2
     this.setStagesInfo();
   }
 }
+
+class GameViewer {
+  constructor() {
+    this.dataMappingSet = {
+      0: '#',
+      1: 'O',
+      2: 'o',
+      3: 'P',
+    };
+  }
+
+  mapNumberToSymbol(number) {
+    switch (number) {
+      case 0:
+        return this.dataMappingSet[0];
+      case 1:
+        return this.dataMappingSet[1];
+      case 2:
+        return this.dataMappingSet[2];
+      case 3:
+        return this.dataMappingSet[3];
+      default:
+        return ' ';
+    }
+  }
+
+  mapRowToSymbol(row) {
+    return row.map(i => this.mapNumberToSymbol(i));
+  }
+
+  renderMap(mapData) {
+    let stageMap = '';
+
+    mapData.forEach(row => {
+      const line = this.mapRowToSymbol(row).join('');
+      stageMap += `${line}\n`;
+    });
+
+    console.log(stageMap);
+  }
+}
