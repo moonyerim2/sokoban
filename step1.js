@@ -182,4 +182,10 @@ class GameViewer {
 플레이어 위치 (${infoData.locationOfPlayer})\n`
     );
   }
+
+  renderStage(stage, map, info) {
+    console.log(`${stage}\n`);
+    this.renderMap(map);
+    this.renderInfo(info);
+  }
 }
