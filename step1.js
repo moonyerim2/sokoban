@@ -126,4 +126,9 @@ Stage 2
       this.stagesInfo[stage] = this.setSingleStageInfo(this.stages[stage]);
     }
   }
+
+  setMapData() {
+    this.setStages();
+    this.setStagesInfo();
+  }
 }
