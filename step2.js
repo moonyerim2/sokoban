@@ -212,9 +212,11 @@ class Player {
   moveDown() {
     this.location[0] += 1;
   }
+
   moveLeft() {
     this.location[1] -= 1;
   }
+
   moveRight() {
     this.location[1] += 1;
   }
@@ -243,16 +245,44 @@ class GameController {
   constructor() {
     this.gameMap = new MapMaker();
     this.gameView = new GameViewer();
+    this.endCommand = 'q';
     this.init();
   }
 
+  creatReadlineInterface() {
+    const readline = require('readline');
+
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+
+    return rl;
+  }
+
+  play() {
+    const rl = this.creatReadlineInterface();
+    rl.setPrompt('SOKOBAN> ');
+    rl.prompt();
+
+    rl.on('line', line => {
+      if (line === this.endCommand) {
+        this.gameView.renderMessage(this.endCommand);
+        rl.close();
+      } else {
+        rl.prompt();
+      }
+    });
+  }
+
   init() {
-    const initailStage = 'Stage2';
+    const currentStage = 'Stage2';
 
     this.gameMap.setMapData();
+    this.gameView.renderStageName(currentStage);
+    this.gameView.renderMap(this.gameMap.stages[currentStage]);
 
-    this.gameView.renderStageName(initailStage);
-    this.gameView.renderMap(this.gameMap.stages[initailStage]);
+    this.play();
   }
 }
 
