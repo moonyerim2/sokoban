@@ -194,8 +194,7 @@ class GameViewer {
     console.log(`${stage}\n`);
   }
 
-  renderStage(stage, map, info) {
-    console.log(`${stage}\n`);
+  renderStage(map, info) {
     this.renderMap(map);
     this.renderInfo(info);
   }
@@ -343,7 +342,7 @@ class GameController {
 
   executeCommand(player, commandArr, stage) {
     const map = this.gameMap.stages[stage];
-    
+
     commandArr.forEach(command => {
       this.changeLocation(command, player, map);
       this.gameView.renderMap(map);
