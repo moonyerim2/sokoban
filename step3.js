@@ -174,23 +174,12 @@ class GameViewer {
     console.log(stageMap);
   }
 
-  renderInfo(infoData) {
-    console.log(
-      `가로크기: ${infoData.width}
-세로크기: ${infoData.heigth}
-구멍의 수: ${infoData.countHall}
-공의 수: ${infoData.countBall}
-플레이어 위치 (${infoData.locationOfPlayer})\n`
-    );
-  }
-
   renderStageName(stage) {
     console.log(`${stage}\n`);
   }
 
-  renderStage(map, info) {
+  renderStage(map) {
     this.renderMap(map);
-    this.renderInfo(info);
   }
 
   renderErrMessage(command) {
