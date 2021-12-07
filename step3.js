@@ -223,7 +223,7 @@ class GameViewer {
     console.log(`턴수: ${turn}`);
   }
 
-  renderStageClear(stage) {
+  renderStageClearMessage(stage) {
     console.log(`\n빠밤! ${stage} 클리어!\n`);
   }
 }
@@ -313,13 +313,13 @@ class GameController {
     this.gameMap = new MapMaker();
     this.gameView = new GameViewer();
     this.turn = 0;
-    this.goal = 0;
-    this.currentStage = 'Stage1';
+    this.currentStage = 1;
     this.command = {
       end: 'q',
       reset: 'r',
     };
     this.isBlocked = false;
+    this.STAGE = 'Stage';
     this.init();
   }
 
@@ -401,30 +401,39 @@ class GameController {
     this.turn += 1;
   }
 
-  countGoalFromRow(row) {
-    row.forEach(i => {
+  countGoalFromRow(row, rowIndex, goal) {
+    row.forEach((i, columnIndex) => {
       if (Array.isArray(i) && i.includes(2)) {
-        this.goal += 1;
+        goal.push([rowIndex, columnIndex]);
       }
     });
   }
 
-  countGoal(map) {
-    map.forEach(row => {
-      this.countGoalFromRow(row);
+  countGoal(map, player) {
+    const goal = [];
+
+    map.forEach((row, index) => {
+      this.countGoalFromRow(row, index, goal);
     });
+
+    if (goal.length === this.gameMap.stagesInfo[`${this.STAGE}${this.currentStage}`].countHall) {
+      this.stageClear(player);
+    }
   }
 
-  stageClear(map, stage) {
-    this.countGoal(map);
+  stageClear(player) {
+    this.turn = 0;
+    this.currentStage += 1;
+    const stage = `${this.STAGE}${this.currentStage}`;
 
-    if (this.goal === this.gameMap.stagesInfo[stage].countHall) {
-      this.gameView.renderStageClear(stage);
-    }
+    player.location = this.gameMap.stagesInfo[stage].locationOfPlayer;
+    this.gameView.renderStageClearMessage(stage);
+    this.gameView.renderStage(this.gameMap.stages[stage], stage);
   }
 
   executeCommand(player, commandArr, stage) {
     const map = this.gameMap.stages[stage];
+
     commandArr.forEach(command => {
       this.changePlayerLocation(command, player, map);
       this.gameView.renderMap(map);
@@ -434,17 +443,20 @@ class GameController {
       } else {
         this.gameView.renderMessage(command);
         this.gameView.renderTurn(this.turn);
-        this.stageClear(map, stage);
+        this.countGoal(map, player);
       }
     });
   }
 
   resetStage(player) {
-    this.currentStage = 'Stage1';
-    player.location = this.gameMap.stagesInfo[this.currentStage].locationOfPlayer;
+    this.currentStage = 1;
+    this.turn = 0;
+    const stage = `${this.STAGE}${this.currentStage}`;
+
+    player.location = this.gameMap.stagesInfo[stage].locationOfPlayer;
 
     this.gameView.renderInitMessage(this.command.reset);
-    this.gameView.renderStage(this.gameMap.stages[this.currentStage], this.currentStage);
+    this.gameView.renderStage(this.gameMap.stages[stage], stage);
   }
 
   creatReadlineInterface() {
@@ -471,18 +483,20 @@ class GameController {
         this.resetStage(player);
         rl.prompt();
       } else {
-        this.executeCommand(player, line.toLocaleLowerCase().split(''), this.currentStage);
+        this.executeCommand(player, line.toLocaleLowerCase().split(''), `${this.STAGE}${this.currentStage}`);
         rl.prompt();
       }
     });
   }
 
   init() {
-    this.gameMap.setMapData();
-    this.gameView.renderStageName(this.currentStage);
-    this.gameView.renderMap(this.gameMap.stages[this.currentStage]);
+    const stage = `${this.STAGE}${this.currentStage}`;
 
-    this.player = new Player(this.gameMap.stagesInfo[this.currentStage].locationOfPlayer);
+    this.gameMap.setMapData();
+    this.gameView.renderStageName(stage);
+    this.gameView.renderMap(this.gameMap.stages[stage]);
+
+    this.player = new Player(this.gameMap.stagesInfo[stage].locationOfPlayer);
     this.play(this.player);
   }
 }
