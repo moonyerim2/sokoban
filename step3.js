@@ -142,6 +142,7 @@ class GameViewer {
       d: '오른쪽',
     };
     this.q = 'Bye~';
+    this.goal = '0';
   }
 
   mapNumberToSymbol(number) {
@@ -254,54 +255,73 @@ class GameController {
   constructor() {
     this.gameMap = new MapMaker();
     this.gameView = new GameViewer();
-    this.currentStage = 'Stage1';
+    this.currentStage = 'Stage2';
     this.command = {
       end: 'q',
       reset: 'r',
     };
-    this.block = false;
+    this.isBlocked = false;
     this.init();
   }
 
   deleteLocationValue(locationValue) {
     if (Array.isArray(locationValue)) {
-      locationValue.pop();
+      return locationValue[0];
     } else {
       return ' ';
     }
   }
 
-  addLocationValue(newLocationValue) {
-    if (newLocationValue !== ' ') {
-      return newLocationValue;
+  addLocationValue(currentLocationValue, object) {
+    if (currentLocationValue === ' ') {
+      return object;
     }
 
-    return this.gameMap.dataMappingSet.player;
+    if (currentLocationValue === this.gameMap.dataMappingSet.hall) {
+      return [currentLocationValue, object];
+    }
   }
 
-  setNewLocation(player, command, map) {
-    const location = [...player.location];
+  setNewLocation(player, command) {
     player.move(command);
 
-    if (map[player.location[0] - 1][player.location[1] - 1] !== ' ') {
-      player.location = location;
-    }
+    return [...player.location];
   }
 
-  isBlocked(location, newLocation) {
-    return location.join('') === newLocation.join('');
+  moveToNoBlockedSpace(map, locationBeforeMove, currentLocation, object) {
+    map[locationBeforeMove[0] - 1][locationBeforeMove[1] - 1] = this.deleteLocationValue(map[locationBeforeMove[0] - 1][locationBeforeMove[1] - 1]);
+    map[currentLocation[0] - 1][currentLocation[1] - 1] = this.addLocationValue(map[currentLocation[0] - 1][currentLocation[1] - 1], object);
+  }
+
+  checkObstacle(obstacle) {
+    return [' ', this.gameMap.dataMappingSet.hall].indexOf(obstacle);
+  }
+
+  setIsBlocked(checkObstacle) {
+    const noObstacle = -1;
+
+    if (checkObstacle === noObstacle) {
+      this.isBlocked = true;
+    } else {
+      this.isBlocked = false;
+    }
   }
 
   changeLocation(command, player, map) {
-    const location = [...player.location];
-    this.setNewLocation(player, command, map);
-    const newLocation = [...player.location];
+    const locationBeforeMove = [...player.location];
+    const locationAfterMove = this.setNewLocation(player, command);
 
-    this.block = this.isBlocked(location, newLocation);
+    const obstacle = map[locationAfterMove[0] - 1][locationAfterMove[1] - 1];
+    this.setIsBlocked(this.checkObstacle(obstacle));
 
-    if (!this.block) {
-      map[location[0] - 1][location[1] - 1] = this.deleteLocationValue(map[location[0] - 1][location[1] - 1]);
-      map[newLocation[0] - 1][newLocation[1] - 1] = this.addLocationValue(map[newLocation[0] - 1][newLocation[1] - 1]);
+    if (this.isBlocked) {
+      player.location = locationBeforeMove;
+    }
+
+    const currentLocation = [...player.location];
+
+    if (!this.isBlocked) {
+      this.moveToNoBlockedSpace(map, locationBeforeMove, currentLocation, this.gameMap.dataMappingSet.player);
     }
   }
 
