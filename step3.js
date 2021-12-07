@@ -178,8 +178,13 @@ class GameViewer {
     console.log(`${stage}\n`);
   }
 
-  renderStage(map) {
+  renderStage(map, stage) {
+    this.renderStageName(stage);
     this.renderMap(map);
+  }
+
+  renderInitMessage(command) {
+    console.log(`${command}: 게임을 초기화합니다.\n`);
   }
 
   renderErrMessage(command) {
@@ -250,36 +255,12 @@ class GameController {
     this.gameMap = new MapMaker();
     this.gameView = new GameViewer();
     this.currentStage = 'Stage1';
-    this.endCommand = 'q';
+    this.command = {
+      end: 'q',
+      reset: 'r',
+    };
     this.block = false;
     this.init();
-  }
-
-  creatReadlineInterface() {
-    const readline = require('readline');
-
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
-
-    return rl;
-  }
-
-  play(player, stage) {
-    const rl = this.creatReadlineInterface();
-    rl.setPrompt('SOKOBAN> ');
-    rl.prompt();
-
-    rl.on('line', line => {
-      if (line === this.endCommand) {
-        this.gameView.renderMessage(this.endCommand);
-        rl.close();
-      } else {
-        this.executeCommand(player, line.split(''), stage);
-        rl.prompt();
-      }
-    });
   }
 
   deleteLocationValue(locationValue) {
@@ -335,6 +316,44 @@ class GameController {
         this.gameView.renderErrMessage(command);
       } else {
         this.gameView.renderMessage(command);
+      }
+    });
+  }
+
+  resetStage(player) {
+    this.currentStage = 'Stage1';
+    player.location = this.gameMap.stagesInfo[this.currentStage].locationOfPlayer;
+
+    this.gameView.renderInitMessage(this.command.reset);
+    this.gameView.renderStage(this.gameMap.stages[this.currentStage], this.currentStage);
+  }
+
+  creatReadlineInterface() {
+    const readline = require('readline');
+
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+
+    return rl;
+  }
+
+  play(player) {
+    const rl = this.creatReadlineInterface();
+    rl.setPrompt('SOKOBAN> ');
+    rl.prompt();
+
+    rl.on('line', line => {
+      if (line === this.command.end) {
+        this.gameView.renderMessage(this.command.end);
+        rl.close();
+      } else if (line === this.command.reset) {
+        this.resetStage(player);
+        rl.prompt();
+      } else {
+        this.executeCommand(player, line.split(''), this.currentStage);
+        rl.prompt();
       }
     });
   }
