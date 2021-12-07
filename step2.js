@@ -260,18 +260,61 @@ class GameController {
     return rl;
   }
 
-  play() {
+  play(player, stage) {
     const rl = this.creatReadlineInterface();
     rl.setPrompt('SOKOBAN> ');
     rl.prompt();
 
     rl.on('line', line => {
       if (line === this.endCommand) {
-        this.gameView.renderMessage(this.endCommand);
         rl.close();
       } else {
+        this.executeCommand(player, line.split(''), stage);
         rl.prompt();
       }
+    });
+  }
+
+  deleteLocationValue(locationValue) {
+    if (Array.isArray(locationValue)) {
+      locationValue.pop();
+    } else {
+      return ' ';
+    }
+  }
+
+  addLocationValue(newLocationValue) {
+    if (newLocationValue !== ' ') {
+      return newLocationValue;
+    }
+
+    return this.gameMap.dataMappingSet.player;
+  }
+
+  setNewLocation(player, command, map) {
+    const location = [...player.location];
+    player.move(command);
+
+    if (map[player.location[0] - 1][player.location[1] - 1] !== ' ') {
+      player.location = location;
+    }
+  }
+
+  changeLocation(command, player, map) {
+    const location = [...player.location];
+    this.setNewLocation(player, command, map);
+    const newLocation = [...player.location];
+
+    if (location.join('') !== newLocation.join('')) {
+      map[location[0] - 1][location[1] - 1] = this.deleteLocationValue(map[location[0] - 1][location[1] - 1]);
+      map[newLocation[0] - 1][newLocation[1] - 1] = this.addLocationValue(map[newLocation[0] - 1][newLocation[1] - 1]);
+    }
+  }
+
+  executeCommand(player, commandArr, stage) {
+    const map = this.gameMap.stages[stage];
+    commandArr.forEach(command => {
+      this.changeLocation(command, player, map);
     });
   }
 
@@ -282,7 +325,8 @@ class GameController {
     this.gameView.renderStageName(currentStage);
     this.gameView.renderMap(this.gameMap.stages[currentStage]);
 
-    this.play();
+    this.player = new Player(this.gameMap.stagesInfo[currentStage].locationOfPlayer);
+    this.play(this.player, currentStage);
   }
 }
 
