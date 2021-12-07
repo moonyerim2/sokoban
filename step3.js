@@ -215,7 +215,11 @@ class GameViewer {
     } else {
       const Message = '(으)로 이동합니다.';
       console.log(`${command}: ${this.movementKey[command]}${Message}`);
+      this.turn += 1;
     }
+  }
+  renderTurn(turn) {
+    console.log(`턴수: ${turn}`);
   }
 }
 
@@ -303,6 +307,7 @@ class GameController {
   constructor() {
     this.gameMap = new MapMaker();
     this.gameView = new GameViewer();
+    this.turn = 0;
     this.currentStage = 'Stage2';
     this.command = {
       end: 'q',
@@ -387,19 +392,21 @@ class GameController {
     }
 
     this.moveToNoBlockedSpace(map, locationBeforeMove, locationAfterMove, this.gameMap.dataMappingSet.player);
+    this.turn += 1;
   }
 
   executeCommand(player, commandArr, stage) {
     const map = this.gameMap.stages[stage];
-
     commandArr.forEach(command => {
       this.changePlayerLocation(command, player, map);
+      console.log(map)
       this.gameView.renderMap(map);
 
       if (this.isBlocked) {
         this.gameView.renderErrMessage(command);
       } else {
         this.gameView.renderMessage(command);
+        this.gameView.renderTurn(this.turn);
       }
     });
   }
