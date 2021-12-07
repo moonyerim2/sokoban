@@ -249,6 +249,7 @@ class GameController {
   constructor() {
     this.gameMap = new MapMaker();
     this.gameView = new GameViewer();
+    this.currentStage = 'Stage1';
     this.endCommand = 'q';
     this.block = false;
     this.init();
@@ -339,14 +340,12 @@ class GameController {
   }
 
   init() {
-    const currentStage = 'Stage2';
-
     this.gameMap.setMapData();
-    this.gameView.renderStageName(currentStage);
-    this.gameView.renderMap(this.gameMap.stages[currentStage]);
+    this.gameView.renderStageName(this.currentStage);
+    this.gameView.renderMap(this.gameMap.stages[this.currentStage]);
 
-    this.player = new Player(this.gameMap.stagesInfo[currentStage].locationOfPlayer);
-    this.play(this.player, currentStage);
+    this.player = new Player(this.gameMap.stagesInfo[this.currentStage].locationOfPlayer);
+    this.play(this.player);
   }
 }
 
