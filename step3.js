@@ -1,3 +1,5 @@
+const { threadId } = require('worker_threads');
+
 class MapMaker {
   constructor() {
     this.mapText = '';
@@ -264,6 +266,39 @@ class Player {
   }
 }
 
+class Ball {
+  static moveUp(location) {
+    return [location[0] - 1, location[1]];
+  }
+
+  static moveDown(location) {
+    return [location[0] + 1, location[1]];
+  }
+
+  static moveLeft(location) {
+    return [location[0], location[1] - 1];
+  }
+
+  static moveRight(location) {
+    return [location[0], location[1] + 1];
+  }
+
+  static move(command, location) {
+    switch (command) {
+      case 'w':
+        return Ball.moveUp(location);
+      case 's':
+        return Ball.moveDown(location);
+      case 'a':
+        return Ball.moveLeft(location);
+      case 'd':
+        return Ball.moveRight(location);
+      default:
+        return null;
+    }
+  }
+}
+
 class GameController {
   constructor() {
     this.gameMap = new MapMaker();
@@ -314,10 +349,25 @@ class GameController {
     const noObstacle = -1;
 
     if (checkObstacle === noObstacle) {
-      this.isBlocked = true;
-    } else {
-      this.isBlocked = false;
+      return true;
     }
+
+    return false;
+  }
+
+  changeBallLocation(map, command, location, player) {
+    const locationBeforeMove = location;
+    const locationAfterMove = Ball.move(command, locationBeforeMove);
+
+    const obstacle = map[locationAfterMove[0] - 1][locationAfterMove[1] - 1];
+    const isBlocked = this.setIsBlocked(this.checkObstacle(obstacle));
+
+    if (isBlocked) {
+      return;
+    }
+
+    this.moveToNoBlockedSpace(map, locationBeforeMove, locationAfterMove, this.gameMap.dataMappingSet.ball);
+    this.changePlayerLocation(command, player, map);
   }
 
   changePlayerLocation(command, player, map) {
@@ -325,17 +375,18 @@ class GameController {
     const locationAfterMove = this.setNewLocation(player, command);
 
     const obstacle = map[locationAfterMove[0] - 1][locationAfterMove[1] - 1];
-    this.setIsBlocked(this.checkObstacle(obstacle));
+    this.isBlocked = this.setIsBlocked(this.checkObstacle(obstacle));
 
     if (this.isBlocked) {
       player.location = locationBeforeMove;
+
+      if (obstacle !== this.gameMap.dataMappingSet.wall) {
+        this.changeBallLocation(map, command, locationAfterMove, player);
+      }
+      return;
     }
 
-    const currentLocation = [...player.location];
-
-    if (!this.isBlocked) {
-      this.moveToNoBlockedSpace(map, locationBeforeMove, currentLocation, this.gameMap.dataMappingSet.player);
-    }
+    this.moveToNoBlockedSpace(map, locationBeforeMove, locationAfterMove, this.gameMap.dataMappingSet.player);
   }
 
   executeCommand(player, commandArr, stage) {
@@ -385,7 +436,7 @@ class GameController {
         this.resetStage(player);
         rl.prompt();
       } else {
-        this.executeCommand(player, line.split(''), this.currentStage);
+        this.executeCommand(player, line.toLocaleLowerCase().split(''), this.currentStage);
         rl.prompt();
       }
     });
