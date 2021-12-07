@@ -141,6 +141,13 @@ class GameViewer {
       2: 'o',
       3: 'P',
     };
+    this.movementKey = {
+      w: '위',
+      s: '아래',
+      a: '왼쪽',
+      d: '오른쪽',
+    };
+    this.q = 'Bye~';
   }
 
   mapNumberToSymbol(number) {
@@ -191,6 +198,21 @@ class GameViewer {
     console.log(`${stage}\n`);
     this.renderMap(map);
     this.renderInfo(info);
+  }
+
+  renderErrMessage(command) {
+    console.log(`${command}: (경고!) 해당 명령을 수행할 수 없습니다!`);
+  }
+
+  renderMessage(command) {
+    if (command === 'q') {
+      console.log(this.q);
+    } else if (this.movementKey[command] === undefined) {
+      this.renderErrMessage(command);
+    } else {
+      const Message = '(으)로 이동합니다.';
+      console.log(`${command}: ${this.movementKey[command]}${Message}`);
+    }
   }
 }
 
@@ -246,6 +268,7 @@ class GameController {
     this.gameMap = new MapMaker();
     this.gameView = new GameViewer();
     this.endCommand = 'q';
+    this.block = false;
     this.init();
   }
 
@@ -267,6 +290,7 @@ class GameController {
 
     rl.on('line', line => {
       if (line === this.endCommand) {
+        this.gameView.renderMessage(this.endCommand);
         rl.close();
       } else {
         this.executeCommand(player, line.split(''), stage);
@@ -300,12 +324,18 @@ class GameController {
     }
   }
 
+  isBlocked(location, newLocation) {
+    return location.join('') === newLocation.join('');
+  }
+
   changeLocation(command, player, map) {
     const location = [...player.location];
     this.setNewLocation(player, command, map);
     const newLocation = [...player.location];
+    
+    this.block = this.isBlocked(location, newLocation);
 
-    if (location.join('') !== newLocation.join('')) {
+    if (!this.block) {
       map[location[0] - 1][location[1] - 1] = this.deleteLocationValue(map[location[0] - 1][location[1] - 1]);
       map[newLocation[0] - 1][newLocation[1] - 1] = this.addLocationValue(map[newLocation[0] - 1][newLocation[1] - 1]);
     }
@@ -313,8 +343,16 @@ class GameController {
 
   executeCommand(player, commandArr, stage) {
     const map = this.gameMap.stages[stage];
+    
     commandArr.forEach(command => {
       this.changeLocation(command, player, map);
+      this.gameView.renderMap(map);
+
+      if (this.block) {
+        this.gameView.renderErrMessage(command);
+      } else {
+        this.gameView.renderMessage(command);
+      }
     });
   }
 
