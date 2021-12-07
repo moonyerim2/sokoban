@@ -149,7 +149,7 @@ class GameViewer {
     switch (array[1]) {
       case 2:
         return this.goal;
-        case 3:
+      case 3:
         return this.dataMappingSet[3];
     }
   }
@@ -345,7 +345,7 @@ class GameController {
       this.changePlayerLocation(command, player, map);
       this.gameView.renderMap(map);
 
-      if (this.block) {
+      if (this.isBlocked) {
         this.gameView.renderErrMessage(command);
       } else {
         this.gameView.renderMessage(command);
