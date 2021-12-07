@@ -145,7 +145,20 @@ class GameViewer {
     this.goal = '0';
   }
 
+  mapArrayToSymbol(array) {
+    switch (array[1]) {
+      case 2:
+        return this.goal;
+        case 3:
+        return this.dataMappingSet[3];
+    }
+  }
+
   mapNumberToSymbol(number) {
+    if (Array.isArray(number)) {
+      return this.mapArrayToSymbol(number);
+    }
+
     switch (number) {
       case 0:
         return this.dataMappingSet[0];
@@ -307,7 +320,7 @@ class GameController {
     }
   }
 
-  changeLocation(command, player, map) {
+  changePlayerLocation(command, player, map) {
     const locationBeforeMove = [...player.location];
     const locationAfterMove = this.setNewLocation(player, command);
 
@@ -329,7 +342,7 @@ class GameController {
     const map = this.gameMap.stages[stage];
 
     commandArr.forEach(command => {
-      this.changeLocation(command, player, map);
+      this.changePlayerLocation(command, player, map);
       this.gameView.renderMap(map);
 
       if (this.block) {
