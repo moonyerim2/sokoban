@@ -157,8 +157,9 @@ module.exports = class GameController {
     this.turn = 0;
     const stage = `${this.STAGE}${this.currentStage}`;
 
+    this.gameMap.setMapData();
     player.location = this.gameMap.stagesInfo[stage].locationOfPlayer;
-
+    
     this.gameView.renderInitMessage(this.command.reset);
     this.gameView.renderStage(this.gameMap.stages[stage], stage);
   }
