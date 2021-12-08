@@ -226,6 +226,14 @@ class GameViewer {
   renderStageClearMessage(stage) {
     console.log(`\n빠밤! ${stage} 클리어!\n`);
   }
+
+  renderGameClearMessage() {
+    console.log('\n전체 게임을 클리어하셨습니다!\n축하드립니다!\n');
+  }
+
+  renderGreetingMessage() {
+    console.log('\n소코반의 세계에 오신 것을 환영합니다!\n^오^\n');
+  }
 }
 
 class Player {
@@ -426,6 +434,11 @@ class GameController {
     this.currentStage += 1;
     const stage = `${this.STAGE}${this.currentStage}`;
 
+    if (this.currentStage > Object.keys(this.gameMap.stages).length) {
+      this.gameView.renderGameClearMessage();
+      return;
+    }
+
     player.location = this.gameMap.stagesInfo[stage].locationOfPlayer;
     this.gameView.renderStageClearMessage(stage);
     this.gameView.renderStage(this.gameMap.stages[stage], stage);
@@ -493,6 +506,7 @@ class GameController {
     const stage = `${this.STAGE}${this.currentStage}`;
 
     this.gameMap.setMapData();
+    this.gameView.renderGreetingMessage();
     this.gameView.renderStageName(stage);
     this.gameView.renderMap(this.gameMap.stages[stage]);
 
