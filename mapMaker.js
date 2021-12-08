@@ -1,18 +1,6 @@
-class MapMaker {
+module.exports = class MapMaker {
   constructor() {
-    this.mapText = `Stage 1
-#####
-#OoP#
-#####
-=====
-Stage 2
-  #######
-###  O  ###
-#    o    #
-# Oo P oO #
-###  o  ###
- #   O  # 
- ########`;
+    this.mapText = '';
     this.dataMappingSet = {
       wall: 0,
       hall: 1,
@@ -22,6 +10,11 @@ Stage 2
     };
     this.stages = {};
     this.stagesInfo = {};
+  }
+
+  readFile() {
+    const fs = require('fs');
+    this.mapText = fs.readFileSync('map.txt').toString();
   }
 
   mapSymbolToNumber(symbol) {
@@ -117,7 +110,7 @@ Stage 2
       this.setWidth(stageInfo, row);
       this.setInfo(stageInfo, row, i);
     });
-    
+
     return stageInfo;
   }
 
@@ -128,92 +121,8 @@ Stage 2
   }
 
   setMapData() {
+    this.readFile();
     this.setStages();
     this.setStagesInfo();
   }
-}
-
-class GameViewer {
-  constructor() {
-    this.dataMappingSet = {
-      0: '#',
-      1: 'O',
-      2: 'o',
-      3: 'P',
-    };
-  }
-
-  mapNumberToSymbol(number) {
-    switch (number) {
-      case 0:
-        return this.dataMappingSet[0];
-      case 1:
-        return this.dataMappingSet[1];
-      case 2:
-        return this.dataMappingSet[2];
-      case 3:
-        return this.dataMappingSet[3];
-      default:
-        return ' ';
-    }
-  }
-
-  mapRowToSymbol(row) {
-    return row.map(i => this.mapNumberToSymbol(i));
-  }
-
-  renderMap(mapData) {
-    let stageMap = '';
-
-    mapData.forEach(row => {
-      const line = this.mapRowToSymbol(row).join('');
-      stageMap += `${line}\n`;
-    });
-
-    console.log(stageMap);
-  }
-
-  renderInfo(infoData) {
-    console.log(
-      `가로크기: ${infoData.width}
-세로크기: ${infoData.heigth}
-구멍의 수: ${infoData.countHall}
-공의 수: ${infoData.countBall}
-플레이어 위치 (${infoData.locationOfPlayer})\n`
-    );
-  }
-
-  renderStage(stage, map, info) {
-    console.log(`${stage}\n`);
-    this.renderMap(map);
-    this.renderInfo(info);
-  }
-}
-
-class GameController {
-  constructor() {
-    this.gameMap = new MapMaker();
-    this.gameView = new GameViewer();
-    this.init();
-  }
-
-  init() {
-    this.gameMap.setMapData();
-
-    for (let stage in this.gameMap.stages) {
-      this.gameView.renderStage(stage, this.gameMap.stages[stage], this.gameMap.stagesInfo[stage]);
-    }
-  }
-}
-
-class App {
-  constructor() {
-    this.init();
-  }
-
-  init() {
-    new GameController();
-  }
-}
-
-new App();
+};
