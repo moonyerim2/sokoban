@@ -51,24 +51,31 @@ module.exports = class GameController {
     return [' ', this.gameMap.dataMappingSet.hall].indexOf(obstacle);
   }
 
-  setIsBlocked(checkObstacle) {
-    const noObstacle = -1;
 
-    if (checkObstacle === noObstacle) {
-      return true;
+  setIsBlocked(map, locationAfterMove) {
+    const empty = -1;
+    const blockedInfo = {
+      isBlocked: false,
+      obstacle: map[locationAfterMove[0] - 1][locationAfterMove[1] - 1],
+    };
+
+    if (this.checkObstacle(blockedInfo.obstacle) === empty) {
+      blockedInfo.isBlocked = true;
     }
 
-    return false;
+    return blockedInfo;
   }
 
-  changeBallLocation(map, command, location, player) {
+  changeBallLocation(obstacle, map, command, location, player) {
+    if (obstacle === this.gameMap.dataMappingSet.wall) {
+      return;
+    }
+
     const locationBeforeMove = location;
     const locationAfterMove = Ball.move(command, locationBeforeMove);
+    const blockedInfo = this.setIsBlocked(map, locationAfterMove);
 
-    const obstacle = map[locationAfterMove[0] - 1][locationAfterMove[1] - 1];
-    const isBlocked = this.setIsBlocked(this.checkObstacle(obstacle));
-
-    if (isBlocked) {
+    if (blockedInfo.isBlocked) {
       return;
     }
 
@@ -79,16 +86,13 @@ module.exports = class GameController {
   changePlayerLocation(command, player, map) {
     const locationBeforeMove = [...player.location];
     const locationAfterMove = this.setNewLocation(player, command);
-
-    const obstacle = map[locationAfterMove[0] - 1][locationAfterMove[1] - 1];
-    this.isBlocked = this.setIsBlocked(this.checkObstacle(obstacle));
+    const blockedInfo = this.setIsBlocked(map, locationAfterMove);
+    this.isBlocked = blockedInfo.isBlocked;
 
     if (this.isBlocked) {
       player.location = locationBeforeMove;
+      this.changeBallLocation(blockedInfo.obstacle, map, command, locationAfterMove, player);
 
-      if (obstacle !== this.gameMap.dataMappingSet.wall) {
-        this.changeBallLocation(map, command, locationAfterMove, player);
-      }
       return;
     }
 
@@ -200,4 +204,4 @@ module.exports = class GameController {
     this.player = new Player(this.gameMap.stagesInfo[stage].locationOfPlayer);
     this.play(this.player);
   }
-}
+};
