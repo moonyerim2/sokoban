@@ -206,3 +206,4 @@ module.exports = class GameController {
     this.play(this.player);
   }
 };
+

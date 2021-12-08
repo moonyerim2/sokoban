@@ -104,3 +104,4 @@ module.exports = class GameViewer {
     console.log('\n소코반의 세계에 오신 것을 환영합니다!\n^오^\n');
   }
 };
+
